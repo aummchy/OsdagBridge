@@ -3,6 +3,7 @@
 # ═══════════════════════════════════════════════════════════════════════════════
 
 from osdagbridge.core.reports.report_utils import _fig_or_placeholder, _render_value, _tex, get_girder_entries
+from osdagbridge.core.reports import styles
 from osdagbridge.core.utils.common import (
     KEY_CARRIAGEWAY_WIDTH,
     KEY_SD_SECTION_DESIGNATION,
@@ -139,9 +140,9 @@ def executive_summary(input_dict, output_dict, fig_paths) -> str:
     n_cols = len(labels)
 
     # Column widths: row-label column fixed at 2.8cm; girder columns share remainder
-    label_col_cm = 2.8
+    label_col_cm = styles.EXEC_LABEL_COL_CM
     # Available width ≈ 15.0cm for A4 with 1in margins; each girder col gets equal share
-    girder_col_cm = round(max(1.5, (15.0 - label_col_cm) / n_cols), 1)
+    girder_col_cm = round(max(styles.EXEC_MIN_GIRDER_COL_CM, (styles.EXEC_AVAILABLE_WIDTH_CM - label_col_cm) / n_cols), 1)
     col_spec = '|C{' + str(label_col_cm) + 'cm}|' + '|'.join(['C{' + str(girder_col_cm) + 'cm}'] * n_cols) + '|'
 
     # Header row
@@ -190,7 +191,7 @@ This section provides a concise summary of the bridge design, key inputs, govern
 \label{sec:project-overview}
 
 
-\begin{tabular}{|L{5.5cm}|L{8.5cm}|}
+\begin{tabular}{""" + styles.STD_COLSPEC_2COL + r"""}
 \hline
 \textbf{Bridge Type} & """ + (_render_value(input_dict, KEY_STRUCTURE_TYPE)) + r""" \\
 \hline
@@ -247,6 +248,5 @@ Deck design pass
 \end{itemize}
 
 % Restore numbered chapter format
-\titleformat{\chapter}[block]{\normalfont\Large\bfseries\centering}{\thechapter}{1em}{}
-\titlespacing*{\chapter}{0pt}{-30pt}{10pt}
+""" + styles.CHAPTER_TITLE_RESTORE + r"""
 """

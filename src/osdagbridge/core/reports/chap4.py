@@ -6,6 +6,7 @@ from osdagbridge.core.utils.common import (
     KEY_SD_DEFL_TOTAL,
 )
 from osdagbridge.core.reports.report_utils import _tex, _fig_embed
+from osdagbridge.core.reports import styles
 
 if TYPE_CHECKING:
     from .report_generator import ReportDataBridge
@@ -83,8 +84,7 @@ A grillage model was used for structural analysis. The deck is idealized as a gr
 \vspace{1em}
 \begingroup
 \footnotesize
-\setlength{\tabcolsep}{3pt}
-\renewcommand{\arraystretch}{1.25}
+""" + styles.TABLE_OVERRIDE_TABCOLSEP_3PT + "\n" + styles.TABLE_OVERRIDE_ARRAYSTRETCH_1_25 + r"""
 
 \begin{longtable}{|
 >{\centering\arraybackslash}p{3.1cm}|
@@ -176,8 +176,8 @@ A grillage model was used for structural analysis. The deck is idealized as a gr
 
 \vspace{1em}
 \noindent
-""" + _fig_embed(fig_paths.get('bm_envelope'), 'Bending Moment Envelope (Envelope ULS): Max/min BM along span. X-axis: distance from left support (m). Y-axis: Bending Moment (kN-m).', width=r'0.75\textwidth') + r"""
-""" + _fig_embed(fig_paths.get('sf_envelope'), 'Shear Force Envelope (Envelope ULS): Max/min SF along span. X-axis: distance from left support (m). Y-axis: Shear Force (kN).', width=r'0.75\textwidth') + r"""
-""" + _fig_embed(fig_paths.get('defl_ll'), 'Vertical Deflection D$_y$ (1.0 LL): Maximum deflection along span. Load Case: 1.0 LL, Combination: $D_y$. Nodes shown. Isometric view.', width=r'0.75\textwidth') + r"""
+""" + _fig_embed(fig_paths.get('bm_envelope'), 'Bending Moment Envelope (Envelope ULS): Max/min BM along span. X-axis: distance from left support (m). Y-axis: Bending Moment (kN-m).', width=styles.FIGURE_WIDTH_ENVELOPES) + r"""
+""" + _fig_embed(fig_paths.get('sf_envelope'), 'Shear Force Envelope (Envelope ULS): Max/min SF along span. X-axis: distance from left support (m). Y-axis: Shear Force (kN).', width=styles.FIGURE_WIDTH_ENVELOPES) + r"""
+""" + _fig_embed(fig_paths.get('defl_ll'), 'Vertical Deflection D$_y$ (1.0 LL): Maximum deflection along span. Load Case: 1.0 LL, Combination: $D_y$. Nodes shown. Isometric view.', width=styles.FIGURE_WIDTH_ENVELOPES) + r"""
 """
 

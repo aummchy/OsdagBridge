@@ -1,3 +1,5 @@
+from osdagbridge.core.reports import styles
+
 # =============================================================================
 # Chapter 3: Loads and Load Combinations
 # Extracted from report_generator.py — DO NOT add business logic here.
@@ -272,7 +274,7 @@ def ch3_loads(input_dict):
 This section summarizes all loads applied to the bridge and the load combinations considered for analysis and design.
 
 \vspace{1em}
-\begin{longtable}{|L{5.5cm}|p{10.0cm}|}
+\begin{longtable}{""" + styles.STD_COLSPEC_LONG_2COL + r"""}
 \caption{\textbf{Dead Load -- Self Weight}}
 \hline
 \textbf{parameter} & \textbf{value} \\
@@ -286,7 +288,7 @@ This section summarizes all loads applied to the bridge and the load combination
 \end{longtable}
 
 \vspace{1em}
-\begin{longtable}{|L{5.5cm}|p{10.0cm}|}
+\begin{longtable}{""" + styles.STD_COLSPEC_LONG_2COL + r"""}
 \caption{\textbf{Dead Load for Surfacing (DW)}}
 \hline
 \textbf{parameter} & \textbf{value} \\
@@ -300,7 +302,7 @@ This section summarizes all loads applied to the bridge and the load combination
 \end{longtable}
 
 \vspace{1em}
-\begin{longtable}{|L{5.5cm}|p{10.0cm}|}
+\begin{longtable}{""" + styles.STD_COLSPEC_LONG_2COL + r"""}
 \caption{\textbf{Live Loads (LL)}}
 \hline
 \textbf{parameter} & \textbf{value} \\
@@ -316,7 +318,7 @@ This section summarizes all loads applied to the bridge and the load combination
 \end{longtable}
 
 \vspace{1em}
-\begin{longtable}{|L{5.5cm}|p{10.0cm}|}
+\begin{longtable}{""" + styles.STD_COLSPEC_LONG_2COL + r"""}
 \caption{\textbf{Wind Load (WL) --- per IRC 6}}
 \hline
 \textbf{parameter} & \textbf{value} \\
@@ -340,7 +342,7 @@ This section summarizes all loads applied to the bridge and the load combination
 \end{longtable}
 
 \vspace{1em}
-\begin{longtable}{|L{5.5cm}|p{10.0cm}|}
+\begin{longtable}{""" + styles.STD_COLSPEC_LONG_2COL + r"""}
 \caption{\textbf{Earthquake Load (EL) --- per IRC 6}}
 \hline
 \textbf{parameter} & \textbf{value} \\
@@ -366,7 +368,7 @@ This section summarizes all loads applied to the bridge and the load combination
 \end{longtable}
 
 \vspace{1em}
-\begin{longtable}{|L{5.5cm}|p{10.0cm}|}
+\begin{longtable}{""" + styles.STD_COLSPEC_LONG_2COL + r"""}
 \caption{\textbf{Temperature Load (TL) --- per IRC 6}}
 \hline
 \textbf{parameter} & \textbf{value} \\

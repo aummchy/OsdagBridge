@@ -83,7 +83,11 @@ TABLE_OVERRIDE_ARRAYSTRETCH_1_25 = r"\renewcommand{\arraystretch}{1.25}"
 TABLE_OVERRIDE_LTLEFT_0 = r"""\setlength\LTleft{0pt}
 \setlength\LTright{\fill}"""
 #   used at: chap2.py:388-389,403-404  chap5.py:1205-1206,1412-1413
-#   (chap5.py:1456-1457 identical content with braces: \setlength{\LTleft}{0pt})
+
+# Braced spelling at chap5.py:1456-1457 — verbatim copy, kept SEPARATE from the
+# braceless TABLE_OVERRIDE_LTLEFT_0 above (never merge the two spellings).
+TABLE_OVERRIDE_LTLEFT_0_BRACED = r"""\setlength{\LTleft}{0pt}
+\setlength{\LTright}{\fill}"""
 
 # ═══════════════════════════════════════════════════════════════════════
 # 4. HEADER / FOOTER THEME

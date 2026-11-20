@@ -1,3 +1,5 @@
+from osdagbridge.core.reports import styles
+
 # Chapter 2: Input Parameters — exact LaTeX template match
 
 
@@ -99,7 +101,7 @@ This section documents all inputs provided to OsdagBridge. User-provided inputs 
 \begin{table}[H]
 \caption{\textbf{Project Location}}
 \label{subsec:project-location}
-\begin{tabular}{|L{5.5cm}|L{8.5cm}|}
+\begin{tabular}{""" + styles.STD_COLSPEC_2COL + r"""}
 \hline
 \textbf{parameter} & \textbf{value} \\
 \hline
@@ -120,7 +122,7 @@ This section documents all inputs provided to OsdagBridge. User-provided inputs 
 \begin{table}[H]
 \caption{\textbf{Bridge Geometry}}
 \label{subsec:bridge-geometry}
-\begin{tabular}{|L{5.5cm}|L{8.5cm}|}
+\begin{tabular}{""" + styles.STD_COLSPEC_2COL + r"""}
 \hline
 \textbf{parameter} & \textbf{value} \\
 \hline
@@ -143,7 +145,7 @@ This section documents all inputs provided to OsdagBridge. User-provided inputs 
 \begin{table}[H]
 \caption{\textbf{Material Selection}}
 \label{subsec:material}
-\begin{tabular}{|L{5.5cm}|L{8.5cm}|}
+\begin{tabular}{""" + styles.STD_COLSPEC_2COL + r"""}
 \hline
 \textbf{parameter} & \textbf{value} \\
 \hline
@@ -167,7 +169,7 @@ Where the user has modified additional inputs, those values are reported here. W
 
 \vspace{0.8cm}
 
-\begin{longtable}{|L{5.5cm}|p{10.0cm}|}
+\begin{longtable}{""" + styles.STD_COLSPEC_LONG_2COL + r"""}
 \caption{\textbf{Typical Section Details}}
 \hline
 \textbf{parameter} & \textbf{value} \\
@@ -190,7 +192,7 @@ Where the user has modified additional inputs, those values are reported here. W
 
 \vspace{0.8em}
 
-\begin{longtable}{|L{5.5cm}|p{10.0cm}|}
+\begin{longtable}{""" + styles.STD_COLSPEC_LONG_2COL + r"""}
 \caption{\textbf{Components Details}}
 \hline
 \textbf{parameter} & \textbf{value} \\
@@ -384,9 +386,7 @@ def _bracing_tables(input_dict, n_girders):
 \newpage
 
 \vspace{0.4em}
-\setlength{\tabcolsep}{4pt}
-\setlength\LTleft{0pt}
-\setlength\LTright{\fill}
+""" + styles.TABLE_OVERRIDE_TABCOLSEP_4PT + "\n" + styles.TABLE_OVERRIDE_LTLEFT_0 + r"""
 
 \begin{longtable}{|L{2.2cm}|L{2.2cm}|L{3.0cm}|L{2.5cm}|C{1.8cm}|C{1.8cm}|}
 \caption{\textbf{Member Properties: Cross Bracing Details}}
@@ -399,9 +399,7 @@ def _bracing_tables(input_dict, n_girders):
 
 \vspace{0.4em}
 \noindent
-\setlength{\tabcolsep}{4pt}
-\setlength\LTleft{0pt}
-\setlength\LTright{\fill}
+""" + styles.TABLE_OVERRIDE_TABCOLSEP_4PT + "\n" + styles.TABLE_OVERRIDE_LTLEFT_0 + r"""
 
 \begin{longtable}{|L{2.2cm}|L{2.2cm}|L{3.0cm}|L{2.5cm}|C{1.8cm}|C{1.8cm}|}
 \caption{\textbf{Member Properties: End Diaphragm Details}}
@@ -423,7 +421,7 @@ def _shear_connector_table(input_dict, output_dict=None):
 \vspace{2.2em}
 
 \vspace{0.4em}
-\begin{longtable}{|L{5.5cm}|p{10.0cm}|}
+\begin{longtable}{""" + styles.STD_COLSPEC_LONG_2COL + r"""}
 \caption{\textbf{Shear Connector Details}}
 \hline
 \textbf{parameter} & \textbf{value} \\
@@ -451,7 +449,7 @@ def _safety_factors_table(input_dict):
 \noindent\textit{Note: All values are per IRC 22 Table 1 unless user-modified.}
 
 \vspace{0.4em}
-\begin{longtable}{|L{5.5cm}|p{10.0cm}|}
+\begin{longtable}{""" + styles.STD_COLSPEC_LONG_2COL + r"""}
 \caption{\textbf{Partial Safety Factors}}
 \hline
 \textbf{parameter} & \textbf{value} \\

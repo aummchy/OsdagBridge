@@ -5,6 +5,7 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 
+from osdagbridge.core.reports import styles
 from osdagbridge.core.utils.common import (
     KEY_DD_AS_BOT,
     KEY_DD_AS_LONG,
@@ -1202,8 +1203,7 @@ This section presents all structural design checks performed by OsdagBridge. For
 
 \vspace{1em}
 
-\setlength\LTleft{0pt}
-\setlength\LTright{\fill}
+""" + styles.TABLE_OVERRIDE_LTLEFT_0 + r"""
 
 \begin{longtable}{|L{3.2cm}|>{\centering\arraybackslash}p{4.3cm}|>{\centering\arraybackslash}p{4.3cm}|C{2.0cm}|}
 \caption{\textbf{Shear Connector Spacing}}
@@ -1232,7 +1232,7 @@ This section presents all structural design checks performed by OsdagBridge. For
 The reinforced concrete deck slab is designed per IRC~112:2011 (flexure, shear, crack width) and IRC~22:2014 (composite construction). Wheel loads are distributed using Pigeaud's method. The deck is checked for flexure in the transverse and longitudinal directions, punching shear, one-way (beam) shear, crack width, and reinforcement detailing.
 
 \vspace{1em}
-\begin{longtable}{|L{5.5cm}|p{10.0cm}|}
+\begin{longtable}{""" + styles.STD_COLSPEC_LONG_2COL + r"""}
 \caption{\textbf{Deck Slab --- Loading and Geometry}}
 \hline
 \textnormal{Effective Span of Deck Slab, $l_{eff}$} & """ + _dkf(KEY_DD_SPAN, nd=0, scale=1000.0) + r""" mm (girder spacing, c/c) \\[6pt]
@@ -1408,9 +1408,7 @@ Cross bracing between adjacent plate girders provides lateral stability during c
 
 \vspace{0.4em}
 \noindent
-\setlength{\tabcolsep}{4pt}
-\setlength\LTleft{0pt}
-\setlength\LTright{\fill}
+""" + styles.TABLE_OVERRIDE_TABCOLSEP_4PT + "\n" + styles.TABLE_OVERRIDE_LTLEFT_0 + r"""
 
 \begin{longtable}{|C{2.0cm}|L{2.0cm}|L{2.2cm}|C{2.5cm}|C{2.0cm}|C{2.0cm}|}
 \caption{\textbf{Cross Bracing --- Connection and Section Properties}}
@@ -1452,9 +1450,7 @@ End diaphragms at the supports transfer transverse loads to the bearings, restra
 
 \vspace{0.4em}
 \noindent
-\setlength{\tabcolsep}{4pt}
-\setlength{\LTleft}{0pt}
-\setlength{\LTright}{\fill}
+""" + styles.TABLE_OVERRIDE_TABCOLSEP_4PT + "\n" + styles.TABLE_OVERRIDE_LTLEFT_0_BRACED + r"""
 
 \begin{longtable}{|C{2.0cm}|L{2.0cm}|L{2.2cm}|C{2.5cm}|C{2.0cm}|C{2.0cm}|}
 \caption{\textbf{End Diaphragm --- Connection and Section Properties}}

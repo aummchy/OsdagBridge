@@ -1,4 +1,5 @@
 from osdagbridge.core.reports.report_utils import _tex
+from osdagbridge.core.reports import styles
 
 
 def ch1_project_info(m):
@@ -10,7 +11,7 @@ This section records all project metadata as entered by the designer.
 \section{Project and Design Team Details}
 \label{sec:project-details}
 
-\begin{tabular}{|L{5.5cm}|L{8.5cm}|}
+\begin{tabular}{""" + styles.STD_COLSPEC_2COL + r"""}
 \hline
 \textbf{Project Name} & """ + _tex(m.project_name) + r""" \\
 \hline
