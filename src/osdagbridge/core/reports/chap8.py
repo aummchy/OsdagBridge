@@ -132,6 +132,7 @@ IS 2062 & 2011 & Structural steel - yield and ultimate strength by grade \\
 \item Default reinforcement grade: Fe500.
 \end{itemize}
 
+\needspace{7\baselineskip}
 \textbf{Partial Safety Factors (IRC 22:2015 Cl.601.4)}
 
 \begin{itemize}

@@ -29,6 +29,12 @@ DOCCLASS = r"\documentclass[12pt,a4paper]{report}"
 GEOMETRY_PACKAGE = r"\usepackage[a4paper, margin=1in]{geometry}"
 LINE_SPACING = r"\setstretch{1.15}"
 
+# task2 — reserve explicit room for the fancy footer and stop the report class's
+# default \flushbottom from stretching glue into it. Without these, table rows
+# (e.g. a "G3" row) land below the 72pt body margin, in the footer zone.
+FOOTSKIP = r"\setlength{\footskip}{45pt}"
+RAGGED_BOTTOM = r"\raggedbottom"
+
 CAPTION_SETUP = r"""\captionsetup{
     labelfont=bf,
     justification=raggedright,

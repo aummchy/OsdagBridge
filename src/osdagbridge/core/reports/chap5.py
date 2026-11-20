@@ -1094,6 +1094,7 @@ This section presents all structural design checks performed by OsdagBridge. For
 \noindent\textit{Note: IS 800:2007 Table 2}
 
 \vspace{1em}
+\needspace{10\baselineskip}
 \begin{longtable}{|C{2.5cm}|C{3.5cm}|C{3.5cm}|>{\centering\arraybackslash}p{4.2cm}|C{1.8cm}|}
 \caption{\textbf{Moment Capacity Check}}
 """ + styles.longtable_head(r"""\hline
@@ -1114,6 +1115,7 @@ This section presents all structural design checks performed by OsdagBridge. For
 \noindent\textit{Note: IS 800 Cl. 8.4, IRC 22 Cl. 603.3.3.2}
 
 \vspace{1em}
+\needspace{10\baselineskip}
 \begin{longtable}{|C{2.5cm}|C{3.5cm}|C{3.5cm}|>{\centering\arraybackslash}p{4.2cm}|C{1.8cm}|}
 \caption{\textbf{Interaction Checks (M-V and M-N)}}
 """ + styles.longtable_head(r"""\hline
@@ -1124,6 +1126,7 @@ This section presents all structural design checks performed by OsdagBridge. For
 \noindent\textit{Note: IRC 22 Cl. 603.3.3.3}
 
 \vspace{1em}
+\needspace{10\baselineskip}
 \begin{longtable}{|C{2.5cm}|C{3.5cm}|C{3.5cm}|>{\centering\arraybackslash}p{4.2cm}|C{1.8cm}|}
 \caption{\textbf{Lateral Torsional Buckling Check -- Construction Stage}}
 """ + styles.longtable_head(r"""\hline

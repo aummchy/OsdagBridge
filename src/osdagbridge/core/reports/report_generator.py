@@ -158,7 +158,7 @@ def preamble(project_name, job_number, report_date, report_version='Rev 0'):
 """ + styles.DOCCLASS + r"""
 
 % Packages
-""" + styles.GEOMETRY_PACKAGE + r"""
+""" + styles.GEOMETRY_PACKAGE + "\n" + styles.FOOTSKIP + "\n" + styles.RAGGED_BOTTOM + r"""
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{amssymb}
