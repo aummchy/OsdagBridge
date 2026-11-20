@@ -264,3 +264,6 @@ src/osdag_map_cache/
 temp_plot.html
 *.html
 tools/
+
+# Local agent instructions (not part of the deliverable)
+agent.md
