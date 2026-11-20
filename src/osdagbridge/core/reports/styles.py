@@ -232,6 +232,24 @@ TITLEPAGE_COLSPEC = r"|L{4cm}|L{10cm}|"
 # are one-off, table-specific structures — left in place for now (see working/
 # notes: pending user decision whether to also centralize them).
 
+# ── Longtable repeated headers (task1) ──────────────────────────────────────
+
+def longtable_head(header_rows: str) -> str:
+    """Build the first-page and repeated header of a ``longtable``.
+
+    The caller emits ``\\caption{...}\\\\`` immediately before the helper call and
+    writes the table body immediately after it. The header row block is given
+    ONCE (written between ``\\hline`` markers) and emitted twice: once as the
+    first-page head and once as the head repeated on every continuation page.
+    Keeping the block in one place avoids the copy/paste bug where the repeated
+    head was left empty.
+
+    Tables that have no column-header row (simple key/value 2-column tables)
+    are deliberately NOT wrapped — see working/01_repeated_table_headers.md.
+    """
+    return (header_rows + "\n\\endfirsthead\n\n"
+            + header_rows + "\n\\endhead")
+
 # ═══════════════════════════════════════════════════════════════════════
 # 7. FIGURE SETTINGS
 #    (was: report_utils.py:76-111, chap6.py:31-62, chap4.py:179-181)
