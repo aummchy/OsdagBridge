@@ -1413,6 +1413,7 @@ Cross bracing between adjacent plate girders provides lateral stability during c
 \noindent
 """ + styles.TABLE_OVERRIDE_TABCOLSEP_4PT + "\n" + styles.TABLE_OVERRIDE_LTLEFT_0 + r"""
 
+\needspace{14\baselineskip}
 \begin{longtable}{|C{2.0cm}|L{2.0cm}|L{2.2cm}|C{2.5cm}|C{2.0cm}|C{2.0cm}|}
 \caption{\textbf{Cross Bracing --- Connection and Section Properties}}
 """ + styles.longtable_head(r"""\hline

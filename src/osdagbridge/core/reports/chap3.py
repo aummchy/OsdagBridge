@@ -90,13 +90,16 @@ def ch3_loads(input_dict):
     from osdagbridge.core.utils.codes.irc6_2017 import IRC6_2017
     span = input_dict.get(KEY_SPAN)
     impact_factor_str = ""
+    im_a_str = "N/A"   # per-vehicle value for the new vehicle table
+    im_aa_str = "N/A"  # per-vehicle value for the new vehicle table
     if span not in (None, ""):
         try:
             span_m = float(span)
             factors = []
             if input_dict.get(KEY_LL_IRC_CLASS_A):
                 im_a = IRC6_2017.cl_208_2_impact_factor(span_m)
-                factors.append(f"Class A: {1.0 + im_a:.3f}")
+                im_a_str = f"{1.0 + im_a:.3f}"
+                factors.append(f"Class A: {im_a_str}")
             is_wheeled_heavy = (
                 input_dict.get(KEY_LL_IRC_70R_WHEELED) or 
                 input_dict.get(KEY_LL_IRC_AA_WHEELED) or 
@@ -108,7 +111,8 @@ def ch3_loads(input_dict):
             )
             if is_wheeled_heavy or is_tracked_heavy:
                 im_aa = IRC6_2017.cl_208_3_impact_factor(span_m)
-                factors.append(f"Class AA/70R: {1.0 + im_aa:.3f}")
+                im_aa_str = f"{1.0 + im_aa:.3f}"
+                factors.append(f"Class AA/70R: {im_aa_str}")
             
             if factors:
                 impact_factor_str = ", ".join(factors)
@@ -121,11 +125,13 @@ def ch3_loads(input_dict):
 
     lanes = input_dict.get(KEY_WC_LD_LANE_TABLE_COUNT)
     braking_force_str = ""
+    braking_value_str = "N/A"  # numeric kN value for the new vehicle table
     if lanes not in (None, ""):
         try:
             lanes_int = int(lanes)
             braking_force_t = IRC6_2017.cl_211_2_braking_force(lanes_int)
             braking_force_kN = braking_force_t * 9.81
+            braking_value_str = f"{braking_force_kN:.2f}"
             braking_force_str = f"{braking_force_kN:.2f} kN ({braking_force_t:.2f} tonnes)"
         except Exception:
             braking_force_str = "N/A"
@@ -143,6 +149,25 @@ def ch3_loads(input_dict):
         fp_str = f"{fp_value} kN/m²"
     else:
         fp_str = "N/A"
+
+    # --- Vehicle live loads: one row per vehicle selected in the UI -----------
+    _ecc = _render_value(input_dict, 'loading.live_load.eccentricity', ' m')
+    _vehicle_rows = []
+    for _name in vehicles:
+        if 'Class A' in _name:
+            _im, _considered, _bval = im_a_str, "Yes", braking_value_str
+        elif '70R' in _name:
+            _im, _considered, _bval = im_aa_str, "Yes", braking_value_str
+        elif 'Class SV' in _name:
+            _im, _considered, _bval = "N/A", "No", "---"
+        else:
+            _im, _considered, _bval = "N/A", "N/A", "N/A"
+        _vehicle_rows.append(
+            r"\textnormal{" + _tex(_name) + r"} & N/A & " + _tex(_im)
+            + r" & " + _considered + r" & " + _bval + r" & " + _ecc
+            + r" \\[6pt]" + "\n" + r"\hline" + "\n"
+        )
+    vehicle_rows_tex = "".join(_vehicle_rows)
 
     # Vz / Pz — prefer stored computed values; fall back to IRC6 Table 12
     vz_val = input_dict.get(KEY_WL_HOURLY_MEAN_WIND)
@@ -302,18 +327,29 @@ This section summarizes all loads applied to the bridge and the load combination
 \end{longtable}
 
 \vspace{1em}
+\begin{longtable}{|L{3.0cm}|C{2.2cm}|C{2.0cm}|C{2.2cm}|C{2.4cm}|C{2.0cm}|}
+\caption{\textbf{Vehicle Live Loads (as selected in UI)}}
+""" + styles.longtable_head(r"""\hline
+{\footnotesize\makecell{\textbf{Vehicle}}} & {\footnotesize\makecell{\textbf{Total Load}\\\textbf{(kN)}}} & {\footnotesize\makecell{\textbf{Impact}\\\textbf{Factor}}} & \multicolumn{3}{c|}{{\footnotesize\textbf{Braking Load}}} \\
+\cline{4-6}
+ & & & {\footnotesize\textbf{Considered?}} & {\footnotesize\makecell{\textbf{Value}\\\textbf{(kN)}}} & {\footnotesize\makecell{\textbf{Eccentricity}\\\textbf{(m)}}} \\
+\hline""") + r"""
+""" + vehicle_rows_tex + r"""
+\end{longtable}
+
+\vspace{1em}
 \begin{longtable}{""" + styles.STD_COLSPEC_LONG_2COL + r"""}
-\caption{\textbf{Live Loads (LL)}}
+\caption{\textbf{Footpath Live Load}}
 """ + styles.longtable_head(r"""\hline
 \textbf{parameter} & \textbf{value} \\
 \hline""") + r"""
-\textnormal{Vehicles Considered} & """ + _tex(vehicles_str) + r""" \\[6pt]
+\textnormal{Mode} & """ + _tex(fp_mode or 'N/A') + r""" \\[6pt]
 \hline
-\textnormal{Impact Factor (IRC 6)} & """ + _tex(impact_factor_str) + r""" \\[6pt]
+\textnormal{Pressure} & """ + _tex(fp_str) + r""" \\[6pt]
 \hline
-\textnormal{Braking Load (IRC 6)} & """ + _tex(braking_force_str) + r""" \\[6pt]
+\textnormal{No. of Footpaths} & """ + _render_value(input_dict, 'typical_section.no_of_footpaths') + r""" \\[6pt]
 \hline
-\textnormal{Footpath Live Load (if applicable)} & """ + (_render_value(input_dict, KEY_LL_FOOTPATH_PRESSURE_VALUE, ' kN/m\\textsuperscript{2}')) + r""" \\[6pt]
+\textnormal{Footpath Width (m)} & """ + _render_value(input_dict, 'typical_section.footpath_width', ' m') + r""" \\[6pt]
 \hline
 \end{longtable}
 

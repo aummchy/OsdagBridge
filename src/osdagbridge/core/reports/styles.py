@@ -68,8 +68,7 @@ TABLE_LENGTHS = r"""\numberwithin{table}{chapter}
 
 # Prevent tables from overflowing past the page bottom:
 # if fewer than 5 baseline-skips remain, break to the next page first.
-TABLE_NEEDSPACE = r"""\BeforeBeginEnvironment{table}{\needspace{5\baselineskip}}
-\BeforeBeginEnvironment{longtable}{\needspace{5\baselineskip}}"""
+TABLE_NEEDSPACE = r"""\BeforeBeginEnvironment{table}{\needspace{5\baselineskip}}"""
 
 # Longtable alignment defaults (was: report_generator.py:184-185)
 LT_ALIGN = r"""\setlength{\LTleft}{\fill}
