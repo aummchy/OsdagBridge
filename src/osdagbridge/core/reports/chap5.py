@@ -3,6 +3,8 @@
 # Extracted from report_generator.py — DO NOT add business logic here.
 # =============================================================================
 from __future__ import annotations
+import os
+import re
 from typing import TYPE_CHECKING
 
 from osdagbridge.core.reports import styles
@@ -142,17 +144,60 @@ from osdagbridge.core.utils.common import (
     KEY_UTIL_SHEAR
 )
 
-from osdagbridge.core.reports.report_utils import _tex, _render_value, get_girder_entries
+from osdagbridge.core.reports.report_utils import (
+    _tex, _render_value, get_girder_entries, _fig_embed, ur_summary_chart
+)
 
 if TYPE_CHECKING:
     pass
-def ch5_design_checks(checks_data, bridge) -> str:
+
+# Task #4 — the chart is built from the *same* row strings that are typeset in
+# the Section 5.5 table, so the plotted UR and the tabulated UR cannot disagree.
+_UR_NUMBER_RE = re.compile(r"(\d+\.\d+)")
+_UR_CATEGORIES = (
+    ("Steel Plate Girders", ("Girder ---", "Transverse Shear (slab)")),
+    ("Concrete Deck Slab", ("Crack Width (slab)", "Deck ---")),
+    ("Cross Bracing", ("Cross Bracing ---",)),
+    ("End Diaphragms", ("End Diaphragm ---",)),
+)
+
+
+def collect_ur_summary(t522_rows):
+    """Return the governing (maximum) UR per element category from §5.5 rows.
+
+    Missing/non-numeric URs are skipped (never zero-filled); categories with no
+    data are omitted so the chart only shows values that appear in the table.
+    """
+    values = {}
+    for row in t522_rows:
+        cells = row.split(" & ")
+        if len(cells) < 5:
+            continue  # e.g. a \multicolumn message row has no UR cell
+        match = _UR_NUMBER_RE.search(cells[-1])  # last cell = UR (possibly red-wrapped)
+        if not match:
+            continue
+        for category, prefixes in _UR_CATEGORIES:
+            if row.startswith(prefixes):
+                ur = float(match.group(1))
+                if category not in values or ur > values[category]:
+                    values[category] = ur
+                break
+    return values
+
+
+def ch5_design_checks(checks_data, bridge, fig_paths=None, tmp_images=None) -> str:
     """Chapter 5 — Design Checks.
 
     Parameters
     ----------
     checks_data : dict
         Raw checks payload (currently unused; data is sourced from bridge).
+    fig_paths : dict or None
+        Optional mapping of figure name → LaTeX path; ``ur_summary`` is added
+        here when the UR chart is generated.
+    tmp_images : str or None
+        Temporary image directory (inside the report's TemporaryDirectory)
+        where the generated UR chart PNG is written.
     bridge : ReportDataBridge
         Provides input_dict, output_dict, and helper methods.
     """
@@ -1066,6 +1111,16 @@ Fatigue Shear Resistance, $Q_r$ & IRC 22 Table 8 ($\phi d$, $N_{sc}$) & """
     ]
     t522_content = "\n".join(_t522)
 
+    # Task #4 — generate the UR summary chart from the exact rows typeset above.
+    ur_values = collect_ur_summary(_t522)
+    if fig_paths is not None and tmp_images and ur_values:
+        ur_png = ur_summary_chart(ur_values)
+        if ur_png:
+            ur_path = os.path.join(tmp_images, "ur_summary.png")
+            with open(ur_path, "wb") as fh:
+                fh.write(ur_png)
+            fig_paths["ur_summary"] = ur_path.replace("\\", "/")
+
     return r"""
 \chapter{Design Checks}
 
@@ -1501,5 +1556,10 @@ End diaphragms at the supports transfer transverse loads to the bearings, restra
 \end{longtable}
 \noindent\textit{Note: UR = Demand / Capacity. All values $\leq 1.0$ indicate passing checks. The governing check for each component is highlighted in the individual design check sections above.}
 
+""" + _fig_embed(
+        fig_paths.get('ur_summary') if fig_paths else None,
+        'Governing Utilization Ratios by Element --- UR = Demand / Capacity (red dashed line: UR = 1.0 limit)',
+        width=styles.FIGURE_WIDTH_UR_SUMMARY,
+    ) + r"""
 """
 

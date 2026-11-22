@@ -51,6 +51,9 @@ CAPTION_SETUP = r"""\captionsetup{
 COLOR_OSDAG_GREEN = r"\definecolor{osdagGreen}{HTML}{91B014}"
 OSDAG_GREEN_HEX = "91B014"
 
+# Reserved in task6 for scope item #4: red dashed UR = 1.0 threshold / failing bars.
+FAIL_RED_HEX = "C00000"
+
 # ═══════════════════════════════════════════════════════════════════════
 # 3. TABLE STYLE RULES — GLOBAL (was: report_generator.py:193-207)
 # ═══════════════════════════════════════════════════════════════════════
@@ -268,6 +271,7 @@ FIGURE_VSPACE_AFTER = r"\vspace{0.5em}"       # report_utils:106
 FIGURE_WIDTH_CHAP6 = r"0.85\textwidth"        # chap6.py:32
 FIGURE_MINIPAGE_CHAP6 = r"0.31\textwidth"     # chap6.py:62
 FIGURE_WIDTH_ENVELOPES = r"0.75\textwidth"    # chap4.py:179,180,181
+FIGURE_WIDTH_UR_SUMMARY = r"0.80\textwidth"   # chap5.py: UR summary bar chart (task4)
 
 # ═══════════════════════════════════════════════════════════════════════
 # 8. EXECUTIVE SUMMARY COLUMN MATH

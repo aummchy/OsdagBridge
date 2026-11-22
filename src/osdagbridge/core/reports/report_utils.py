@@ -114,3 +114,118 @@ def _fig_embed(path, caption, width=styles.FIGURE_WIDTH_EMBED, height=None):
             r'}}')
 
 
+# Display labels for the four element categories in the UR summary chart.
+_UR_CHART_LABELS = {
+    "Steel Plate Girders": "Steel Plate\nGirders",
+    "Concrete Deck Slab": "Concrete Deck\nSlab",
+    "Cross Bracing": "Cross\nBracing",
+    "End Diaphragms": "End\nDiaphragms",
+}
+
+
+def ur_summary_chart(values):
+    """Render a bar chart of governing utilization ratios to PNG bytes.
+
+    ``values`` is an ordered mapping ``{category: UR}`` (see
+    ``chap5.collect_ur_summary``).  Bars are green for UR <= 1.0 and red for
+    UR > 1.0; a red dashed reference line marks the UR = 1.0 limit.
+
+    Rendered with Pillow (not matplotlib): matplotlib's compiled bezier
+    extension crashes under the bundled osdagbridge-env on Windows, while
+    Pillow is already a report dependency.  Fully deterministic — no fonts or
+    colors are chosen randomly.  Returns ``None`` on failure so a missing
+    chart degrades to the existing placeholder instead of breaking the report.
+    """
+    if not values:
+        return None
+    try:
+        import io
+        import logging
+        import os
+
+        from PIL import Image, ImageDraw, ImageFont
+
+        green = "#" + styles.OSDAG_GREEN_HEX
+        red = "#" + styles.FAIL_RED_HEX
+        names = list(values)
+        nums = [float(values[n]) for n in names]
+        labels = [_UR_CHART_LABELS.get(n, n) for n in names]
+
+        # Canvas (2× final display size for crisp downsampling).
+        W, H = 1400, 700
+        left, right, top, bottom = 140, 50, 95, 130
+        plot_w, plot_h = W - left - right, H - top - bottom
+        ymax = max(1.2, max(nums) * 1.15)
+        ypx = lambda v: top + plot_h * (1.0 - v / ymax)
+
+        font_path = os.path.join(os.environ.get("WINDIR", r"C:\Windows"),
+                                 "Fonts", "arial.ttf")
+        try:
+            f_title = ImageFont.truetype(font_path, 26)
+            f_tick = ImageFont.truetype(font_path, 20)
+            f_label = ImageFont.truetype(font_path, 22)
+            f_value = ImageFont.truetype(font_path, 22)
+            f_note = ImageFont.truetype(font_path, 19)
+        except OSError:  # pragma: no cover - fallback font
+            f_title = f_tick = f_label = f_value = f_note = ImageFont.load_default()
+
+        img = Image.new("RGB", (W, H), "white")
+        d = ImageDraw.Draw(img)
+
+        # Title and y-axis caption.
+        title = "Governing Utilization Ratios by Element"
+        d.text(((W - d.textlength(title, font=f_title)) / 2, 18), title,
+               fill="#222222", font=f_title)
+        d.text((left - 118, top - 48), "UR", fill="#222222", font=f_tick)
+
+        # Horizontal gridlines + y tick labels.
+        step = 0.25 if ymax <= 1.6 else 0.5
+        t = 0.0
+        while t <= ymax + 1e-9:
+            yy = ypx(t)
+            d.line([(left, yy), (W - right, yy)], fill="#E2E2E2", width=2)
+            s = f"{t:.2f}" if step < 0.5 else f"{t:.1f}"
+            d.text((left - 12 - d.textlength(s, font=f_tick), yy - 13), s,
+                   fill="#444444", font=f_tick)
+            t += step
+
+        # Axes.
+        d.line([(left, top), (left, H - bottom)], fill="#222222", width=3)
+        d.line([(left, H - bottom), (W - right, H - bottom)], fill="#222222", width=3)
+
+        # Red dashed threshold at UR = 1.0.
+        y_limit = ypx(1.0)
+        x = left
+        while x < W - right:
+            d.line([(x, y_limit), (min(x + 14, W - right), y_limit)], fill=red, width=4)
+            x += 24
+        note = "UR = 1.0 (limit)"
+        d.text((W - right - d.textlength(note, font=f_note) - 6, y_limit - 32),
+               note, fill=red, font=f_note)
+
+        # Bars, value labels and wrapped x labels.
+        slot = plot_w / len(nums)
+        bar_w = min(150, slot * 0.55)
+        for i, (num, label) in enumerate(zip(nums, labels)):
+            cx = left + slot * (i + 0.5)
+            bx0, bx1 = cx - bar_w / 2, cx + bar_w / 2
+            by = ypx(num)
+            color = red if num > 1.0 else green
+            d.rectangle([bx0, by, bx1, H - bottom], fill=color,
+                        outline="#333333", width=3)
+            val_s = f"{num:.2f}"
+            d.text((cx - d.textlength(val_s, font=f_value) / 2, by - 34),
+                   val_s, fill=color, font=f_value)
+            for li, line in enumerate(label.split("\n")):
+                d.text((cx - d.textlength(line, font=f_label) / 2,
+                        H - bottom + 18 + li * 30), line,
+                       fill="#222222", font=f_label)
+
+        buf = io.BytesIO()
+        img.save(buf, format="PNG")
+        return buf.getvalue()
+    except Exception as exc:
+        logging.getLogger(__name__).warning("UR summary chart failed: %s", exc)
+        return None
+
+
