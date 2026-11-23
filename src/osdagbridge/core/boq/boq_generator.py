@@ -11,6 +11,12 @@ from osdagbridge.core.utils.common import (
     KEY_TS_NO_OF_GIRDERS,
     KEY_TS_DECK_THICKNESS,
     KEY_TS_GIRDER_SPACING,
+    KEY_MP_GIRDER_DEPTH,
+    KEY_MP_ED_TYPE,
+    KEY_MP_ED_BRACING_TYPE,
+    KEY_MP_ED_TOP_CHORD,
+    KEY_MP_ED_BOTTOM_CHORD,
+    KEY_MP_ED_SECTIONAL_AREA,
 )
 
 logger = logging.getLogger("osdagbridge.core.boq_generator")
@@ -65,7 +71,25 @@ def calculate_material_quantities(inputs: dict, outputs: dict) -> dict:
         "bracing_diag_vol_total": "N.A.",
         "bracing_diag_wt_single": "N.A.",
         "bracing_diag_wt_total": "N.A.",
-        
+
+        "ed_diag_vol_formula": r"\placeholder{Area $\times$ Length}",
+        "ed_diag_qty": "N.A.",
+        "ed_diag_vol_total": "N.A.",
+        "ed_diag_wt_single": "N.A.",
+        "ed_diag_wt_total": "N.A.",
+
+        "ed_top_vol_formula": r"\placeholder{Area $\times$ Length}",
+        "ed_top_qty": "N.A.",
+        "ed_top_vol_total": "N.A.",
+        "ed_top_wt_single": "N.A.",
+        "ed_top_wt_total": "N.A.",
+
+        "ed_bot_vol_formula": r"\placeholder{Area $\times$ Length}",
+        "ed_bot_qty": "N.A.",
+        "ed_bot_vol_total": "N.A.",
+        "ed_bot_wt_single": "N.A.",
+        "ed_bot_wt_total": "N.A.",
+
         "concrete_deck_vol_formula": r"\placeholder{Width $\times$ Thickness $\times$ Length}",
         "concrete_deck_qty": "N.A.",
         "concrete_deck_vol_total": "N.A.",
@@ -324,6 +348,69 @@ def calculate_material_quantities(inputs: dict, outputs: dict) -> dict:
         else:
             # Keep all bracing volumes, quantities, and weights as default placeholder "N.A."
             for prefix in ("bracing_top", "bracing_bot", "bracing_diag"):
+                quantities[f"{prefix}_vol_formula"] = "N.A."
+                quantities[f"{prefix}_qty"] = "N.A."
+                quantities[f"{prefix}_vol_total"] = "N.A."
+                quantities[f"{prefix}_wt_single"] = "N.A."
+                quantities[f"{prefix}_wt_total"] = "N.A."
+
+        # 5b. End Diaphragms (Cross Bracing type only).
+        # Lengths are re-derived from the SAME inputs used by the design path
+        # (plategirderbridge.py:2667-2704: D, h = 0.85*D, s, L_d = sqrt(s^2+h^2));
+        # the design stores only section properties for ED, never the installed
+        # member length, so nothing is guessed here.  Each ED slot is one frame
+        # (M1/M2 = start/finish ends of a girder pair) with two X-brace diagonals
+        # of length L_d plus a top and bottom chord of length s when enabled.
+        ed_slots = [
+            k[len(KEY_MP_ED_TYPE) + 1:] for k in inputs
+            if k.startswith(KEY_MP_ED_TYPE + ".") and inputs.get(k)
+        ]
+        ed_ok = False
+        if ed_slots:
+            try:
+                D = float(resolve_girder_value(inputs, KEY_MP_GIRDER_DEPTH))
+                h = D * 0.85                      # depth ratio, as in design
+                s = float(inputs[KEY_TS_GIRDER_SPACING])
+                slot = ed_slots[0]
+                ed_type = str(inputs.get(f"{KEY_MP_ED_TYPE}.{slot}", "")).strip()
+                bracing_type = str(inputs.get(f"{KEY_MP_ED_BRACING_TYPE}.{slot}", "")).strip()
+                area_cm2 = float(inputs[f"{KEY_MP_ED_SECTIONAL_AREA}.{slot}"])
+                if (ed_type == "Cross Bracing" and
+                        bracing_type in ("X", "X-Bracing") and
+                        D > 0 and s > 0 and area_cm2 > 0):
+                    ed_area = area_cm2 / 10000.0                     # cm² → m²
+                    ed_L_d = math.sqrt(s ** 2 + h ** 2)              # diagonal
+                    ed_chord_L = s                                   # top/bottom
+                    ed_top_on = str(inputs.get(f"{KEY_MP_ED_TOP_CHORD}.{slot}", "No")).strip().lower() not in ("no", "false", "0")
+                    ed_bot_on = str(inputs.get(f"{KEY_MP_ED_BOTTOM_CHORD}.{slot}", "No")).strip().lower() not in ("no", "false", "0")
+                    n_frames = len(ed_slots)                         # 4 in the snapshot
+                    ed_ok = True
+            except (KeyError, TypeError, ValueError):
+                ed_ok = False
+
+        if ed_ok:
+            # Weight = volume × 7.85 t/m³, same basis as the cross-bracing rows
+            # so Volume and Weight columns stay arithmetically consistent.
+            for prefix, length, qty in (
+                ("ed_diag", ed_L_d, 2 * n_frames),
+                ("ed_top", ed_chord_L, n_frames if ed_top_on else 0),
+                ("ed_bot", ed_chord_L, n_frames if ed_bot_on else 0),
+            ):
+                vol_single = ed_area * length
+                vol_total = qty * vol_single
+                wt_single = vol_single * 7.85
+                wt_total = vol_total * 7.85
+                quantities[f"{prefix}_vol_formula"] = (
+                    f"${ed_area:.5f}\\text{{ m}}^2 \\times {length:.2f}\\text{{ m}}"
+                    f" = {vol_single:.5f}\\text{{ m}}^3$"
+                )
+                quantities[f"{prefix}_qty"] = str(qty)
+                quantities[f"{prefix}_vol_total"] = f"{vol_total:.2f}"
+                quantities[f"{prefix}_wt_single"] = f"{wt_single:.4f}"
+                quantities[f"{prefix}_wt_total"] = f"{wt_total:.2f}"
+        else:
+            # Non-X end diaphragms (or missing geometry) → honest N.A.
+            for prefix in ("ed_diag", "ed_top", "ed_bot"):
                 quantities[f"{prefix}_vol_formula"] = "N.A."
                 quantities[f"{prefix}_qty"] = "N.A."
                 quantities[f"{prefix}_vol_total"] = "N.A."

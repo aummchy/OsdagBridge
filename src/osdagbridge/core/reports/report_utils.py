@@ -229,3 +229,140 @@ def ur_summary_chart(values):
         return None
 
 
+# ── Task #5: Chapter 7 material quantity charts ────────────────────────────
+
+def _chart_fonts():
+    """Load the same font set used by the UR chart (with default-font fallback)."""
+    from PIL import ImageFont
+    import os
+
+    path = os.path.join(os.environ.get("WINDIR", r"C:\Windows"), "Fonts", "arial.ttf")
+    try:
+        return {
+            "title": ImageFont.truetype(path, 26),
+            "tick": ImageFont.truetype(path, 20),
+            "label": ImageFont.truetype(path, 22),
+            "value": ImageFont.truetype(path, 22),
+            "note": ImageFont.truetype(path, 19),
+        }
+    except OSError:  # pragma: no cover - fallback font
+        f = ImageFont.load_default()
+        return {k: f for k in ("title", "tick", "label", "value", "note")}
+
+
+def _draw_quantity_panel(d, box, title, items, fonts, fmt="{:.2f}"):
+    """Draw one bar-chart panel into ``box = (x0, y0, x1, y1)`` of a PIL canvas.
+
+    ``items`` is a list of ``(label, value_or_None)``.  A ``None`` value is
+    drawn as an empty outlined bar labelled ``N/A`` — never as zero.
+    """
+    x0, y0, x1, y1 = box
+    pad_l, pad_r, pad_t, pad_b = 92, 24, 66, 92
+    px0, px1 = x0 + pad_l, x1 - pad_r
+    py0, py1 = y0 + pad_t, y1 - pad_b
+    pw, ph = px1 - px0, py1 - py0
+    nums = [float(v) for _, v in items if v is not None]
+    ymax = max(1.0, max(nums) * 1.18) if nums else 1.0
+    ypx = lambda v: py1 - ph * (v / ymax)
+
+    # Units are stated in the LaTeX caption below the figure, not on the plot,
+    # to keep the top y-tick label and the panel title from colliding.
+    d.text((x0 + 12, y0 + 8), title, fill="#222222", font=fonts["title"])
+
+    step = ymax / 4.0
+    t = 0.0
+    while t <= ymax + 1e-9:
+        yy = ypx(t)
+        d.line([(px0, yy), (px1, yy)], fill="#E2E2E2", width=2)
+        s = f"{t:.2f}"
+        d.text((px0 - 10 - d.textlength(s, font=fonts["tick"]), yy - 12), s,
+               fill="#444444", font=fonts["tick"])
+        t += step
+    d.line([(px0, py0), (px0, py1)], fill="#222222", width=3)
+    d.line([(px0, py1), (px1, py1)], fill="#222222", width=3)
+
+    slot = pw / len(items)
+    bar_w = min(130, slot * 0.55)
+    green, red = "#" + styles.OSDAG_GREEN_HEX, "#" + styles.FAIL_RED_HEX
+    for i, (label, value) in enumerate(items):
+        cx = px0 + slot * (i + 0.5)
+        bx0, bx1 = cx - bar_w / 2, cx + bar_w / 2
+        if value is None:
+            top = ypx(ymax * 0.72)
+            d.rectangle([bx0, top, bx1, py1], outline="#9A9A9A", width=3)
+            val_s = "N/A"
+            color = "#777777"
+        else:
+            num = float(value)
+            top = ypx(num)
+            d.rectangle([bx0, top, bx1, py1], fill=green, outline="#333333", width=3)
+            val_s = fmt.format(num)
+            color = green
+        d.text((cx - d.textlength(val_s, font=fonts["value"]) / 2, top - 32),
+               val_s, fill=color, font=fonts["value"])
+        for li, line in enumerate(label.split("\n")):
+            d.text((cx - d.textlength(line, font=fonts["label"]) / 2,
+                    py1 + 16 + li * 28), line, fill="#222222", font=fonts["label"])
+
+
+def steel_tonnage_chart(values):
+    """PNG bytes: structural steel tonnage (MT) by element.
+
+    ``values`` is an ordered mapping ``{label: MT or None}``; ``None`` renders
+    as an outlined N/A bar (no invented number).
+    """
+    if not values:
+        return None
+    try:
+        import io
+        import logging
+
+        from PIL import Image, ImageDraw
+
+        fonts = _chart_fonts()
+        img = Image.new("RGB", (1400, 700), "white")
+        d = ImageDraw.Draw(img)
+        _draw_quantity_panel(
+            d, (0, 0, 1400, 700), "Structural Steel Tonnage by Element",
+            list(values.items()), fonts,
+        )
+        buf = io.BytesIO()
+        img.save(buf, format="PNG")
+        return buf.getvalue()
+    except Exception as exc:
+        logging.getLogger(__name__).warning("Steel tonnage chart failed: %s", exc)
+        return None
+
+
+def concrete_rebar_chart(concrete_m3, rebar_mt):
+    """PNG bytes: concrete volume (m³) and rebar weight (MT) in two panels.
+
+    Separate panels with independent scales — unlike units are never plotted
+    on a shared Y axis.  ``None`` values render as N/A bars.
+    """
+    try:
+        import io
+        import logging
+
+        from PIL import Image, ImageDraw
+
+        fonts = _chart_fonts()
+        img = Image.new("RGB", (1400, 700), "white")
+        d = ImageDraw.Draw(img)
+        d.line([(700, 20), (700, 680)], fill="#C8C8C8", width=2)
+        _draw_quantity_panel(
+            d, (0, 0, 700, 700), "Concrete Volume",
+            [("Deck Slab", concrete_m3)], fonts,
+        )
+        _draw_quantity_panel(
+            d, (700, 0, 1400, 700), "Reinforcement Steel",
+            [("Deck Rebar", rebar_mt)], fonts,
+        )
+        buf = io.BytesIO()
+        img.save(buf, format="PNG")
+        return buf.getvalue()
+    except Exception as exc:
+        logging.getLogger(__name__).warning("Concrete/rebar chart failed: %s", exc)
+        return None
+
+

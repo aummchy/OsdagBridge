@@ -272,6 +272,7 @@ FIGURE_WIDTH_CHAP6 = r"0.85\textwidth"        # chap6.py:32
 FIGURE_MINIPAGE_CHAP6 = r"0.31\textwidth"     # chap6.py:62
 FIGURE_WIDTH_ENVELOPES = r"0.75\textwidth"    # chap4.py:179,180,181
 FIGURE_WIDTH_UR_SUMMARY = r"0.80\textwidth"   # chap5.py: UR summary bar chart (task4)
+FIGURE_WIDTH_QUANTITY = r"0.75\textwidth"     # chap7.py: material quantity charts (task5)
 
 # ═══════════════════════════════════════════════════════════════════════
 # 8. EXECUTIVE SUMMARY COLUMN MATH
